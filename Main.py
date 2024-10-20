@@ -4,18 +4,14 @@ import math
 pygame.init()
 
 class DrawInfomation:
-    BLACK = 0, 0, 0
-    WHITE = 255, 255, 255
-    GREEN = 0, 255, 0
-    RED = 255, 0, 0
-    GREY = 128, 128, 128
-    BACKGROUND_COLOR = WHITE
-
-    GRADIENTS = [
-        GREY,
-        (160, 160, 160),
-        (192, 192, 192)
-    ]
+    LIST_COLOR = [(0, 128, 0), 
+                  (0, 160, 0),
+                  (0, 192, 0)]
+    REPLACE_IN_LIST = 0, 0, 255
+    CURRENT_LIST_POS = 255, 0, 0
+    TITLE_TXT_COLOR = 255, 0, 0
+    MINI_TXT_COLOR = 255, 255, 255
+    BACKGROUND_COLOR = 0, 0, 0
 
     FONT = pygame.font.SysFont('comic', 30)
     LARGE_FONT = pygame.font.SysFont('comic', 40)
@@ -42,13 +38,13 @@ class DrawInfomation:
 def draw(draw_info, algo_name, ascending):
     # Create the background
     draw_info.window.fill(draw_info.BACKGROUND_COLOR)
-    title = draw_info.LARGE_FONT.render(f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.RED)
+    title = draw_info.LARGE_FONT.render(f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.TITLE_TXT_COLOR)
     draw_info.window.blit(title, (draw_info.width / 2 - title.get_width() / 2, 5))
 
-    controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.BLACK)
+    controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.MINI_TXT_COLOR)
     draw_info.window.blit(controls, (draw_info.width / 2 - controls.get_width() / 2, 45))
 
-    sorting = draw_info.FONT.render("S - Switch Algorithm", 1, draw_info.BLACK)
+    sorting = draw_info.FONT.render("S - Switch Algorithm", 1, draw_info.MINI_TXT_COLOR)
     draw_info.window.blit(sorting, (draw_info.width / 2 - sorting.get_width() / 2, 75))
 
     draw_list(draw_info)
@@ -67,7 +63,7 @@ def draw_list(draw_info, color_positions = {}, clear_bg = False):
         x = draw_info.start_x + i * draw_info.block_width
         y = draw_info.height - (val - draw_info.min_val) * draw_info.block_height
 
-        color = draw_info.GRADIENTS[i % 3]
+        color = draw_info.LIST_COLOR[i % 3]
         if i in color_positions:
             color = color_positions[i]
         
@@ -95,7 +91,7 @@ def bubble_sort(draw_info, ascending = True):
 
             if (num1 > num2 and ascending) or (num1 < num2 and not ascending):
                 lst[j], lst[j + 1] = lst[j + 1], lst[j]
-                draw_list(draw_info, {j: draw_info.GREEN, j + 1: draw_info.RED}, True)
+                draw_list(draw_info, {j: draw_info.CURRENT_LIST_POS, j + 1: draw_info.REPLACE_IN_LIST}, True)
                 yield True
     
     return lst
@@ -116,9 +112,18 @@ def insertion_sort(draw_info, ascending=True):
             lst[i] = lst[i - 1]
             i = i - 1
             lst[i] = current
-            draw_list(draw_info, {i - 1: draw_info.GREEN, i: draw_info.RED}, True)
+            draw_list(draw_info, {i - 1: draw_info.CURRENT_LIST_POS, i: draw_info.REPLACE_IN_LIST}, True)
             yield True
     
+    return lst
+
+def generate_1_to_100_list():
+    lst = []
+
+    for i in range(99):
+        lst.append(i + 1)
+    
+    random.shuffle(lst)
     return lst
 
 def main():
@@ -129,7 +134,8 @@ def main():
     min_val = 0
     max_val = 100
 
-    lst = generate_starting_list(n, min_val, max_val)
+    #lst = generate_starting_list(n, min_val, max_val)
+    lst = generate_1_to_100_list()
     draw_info = DrawInfomation(800, 600, lst)
     sorting = False
     ascending = True
@@ -160,7 +166,8 @@ def main():
                 continue
             
             if event.key == pygame.K_r:
-                lst = generate_starting_list(n, min_val, max_val)
+                #lst = generate_starting_list(n, min_val, max_val)
+                lst = generate_1_to_100_list()
                 draw_info.set_list(lst)
                 sorting = False
             elif event.key == pygame.K_SPACE and not sorting:

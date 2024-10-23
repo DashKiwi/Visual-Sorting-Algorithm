@@ -181,19 +181,16 @@ def merge(draw_info, left, mid, right, ascending=True):
     while left_index < len(left_half) and right_index < len(right_half):
         if (left_half[left_index] <= right_half[right_index] and ascending) or \
            (left_half[left_index] > right_half[right_index] and not ascending):
-            # Condition for ascending
-            # Condition for descending
             draw_info.lst[sorted_index] = left_half[left_index]
             left_index += 1
         else:
             draw_info.lst[sorted_index] = right_half[right_index]
             right_index += 1
-        
+
         draw_list(draw_info, {sorted_index: draw_info.REPLACE_IN_LIST}, True)
         yield True
         sorted_index += 1
 
-    # Copy remaining elements of left_half if any
     while left_index < len(left_half):
         draw_info.lst[sorted_index] = left_half[left_index]
         left_index += 1
@@ -201,7 +198,6 @@ def merge(draw_info, left, mid, right, ascending=True):
         draw_list(draw_info, {sorted_index - 1: draw_info.REPLACE_IN_LIST}, True)
         yield True
 
-    # Copy remaining elements of right_half if any
     while right_index < len(right_half):
         draw_info.lst[sorted_index] = right_half[right_index]
         right_index += 1
@@ -275,7 +271,10 @@ def main():
                 sorting = False
             elif event.key == pygame.K_SPACE and not sorting:
                 sorting = True
-                sorting_algorithm_generator = sorting_algorithm(draw_info, ascending)
+                if sorting_algorithm == merge_sort:
+                    sorting_algorithm_generator = sorting_algorithm(draw_info, 0, len(draw_info.lst) - 1, ascending)
+                else:
+                    sorting_algorithm_generator = sorting_algorithm(draw_info, ascending)
             elif event.key == pygame.K_a and not sorting:
                 ascending = True
             elif event.key == pygame.K_d and not sorting:

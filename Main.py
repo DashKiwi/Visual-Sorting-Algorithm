@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 import random
 import math
 pygame.init()
@@ -72,6 +73,13 @@ def draw_list(draw_info, color_positions = {}, clear_bg = False):
     if clear_bg:
         pygame.display.update()
 
+def generate_sine_wave(freq, duration=0.1, sample_rate=44100):
+    t = np.linspace(0, duration, int(sample_rate * duration), False)
+    wave = 0.5 * np.sin(2 * np.pi * freq * t)  # Mono wave
+    wave_stereo = np.column_stack((wave, wave))  # Duplicate for stereo
+    sound = pygame.sndarray.make_sound((wave_stereo * 32767).astype(np.int16))
+    return sound
+        
 def generate_starting_list(n, min_val, max_val):
     lst = []
 
@@ -81,20 +89,31 @@ def generate_starting_list(n, min_val, max_val):
     
     return lst
 
-def bubble_sort(draw_info, ascending = True):
+def bubble_sort(draw_info, ascending=True):
     lst = draw_info.lst
-
     for i in range(len(lst) - 1):
         for j in range(len(lst) - 1 - i):
             num1 = lst[j]
             num2 = lst[j + 1]
 
+            freq1 = map_value_to_freq(num1)
+            freq2 = map_value_to_freq(num2)
+            generate_sine_wave(freq1).play()
+            generate_sine_wave(freq2).play()
+            
             if (num1 > num2 and ascending) or (num1 < num2 and not ascending):
                 lst[j], lst[j + 1] = lst[j + 1], lst[j]
+                swap_freq = map_value_to_freq(num1)
+                generate_sine_wave(swap_freq).play()
                 draw_list(draw_info, {j: draw_info.CURRENT_LIST_POS, j + 1: draw_info.REPLACE_IN_LIST}, True)
                 yield True
-    
     return lst
+
+def map_value_to_freq(value):
+    # Map the value (1 to 100) to frequency (200 Hz to 1000 Hz)
+    min_freq = 200
+    max_freq = 1000
+    return min_freq + (max_freq - min_freq) * (value - 1) / 99
 
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst

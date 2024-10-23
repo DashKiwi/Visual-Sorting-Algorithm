@@ -89,6 +89,12 @@ def generate_starting_list(n, min_val, max_val):
     
     return lst
 
+def map_value_to_freq(value):
+    # Map the value (1 to 100) to frequency (200 Hz to 1000 Hz)
+    min_freq = 200
+    max_freq = 1000
+    return min_freq + (max_freq - min_freq) * (value - 1) / 99
+
 def bubble_sort(draw_info, ascending=True):
     lst = draw_info.lst
     for i in range(len(lst) - 1):
@@ -100,7 +106,7 @@ def bubble_sort(draw_info, ascending=True):
             freq2 = map_value_to_freq(num2)
             generate_sine_wave(freq1).play()
             generate_sine_wave(freq2).play()
-            
+
             if (num1 > num2 and ascending) or (num1 < num2 and not ascending):
                 lst[j], lst[j + 1] = lst[j + 1], lst[j]
                 swap_freq = map_value_to_freq(num1)
@@ -109,17 +115,13 @@ def bubble_sort(draw_info, ascending=True):
                 yield True
     return lst
 
-def map_value_to_freq(value):
-    # Map the value (1 to 100) to frequency (200 Hz to 1000 Hz)
-    min_freq = 200
-    max_freq = 1000
-    return min_freq + (max_freq - min_freq) * (value - 1) / 99
-
 def insertion_sort(draw_info, ascending=True):
     lst = draw_info.lst
 
     for i in range(1, len(lst)):
         current = lst[i]
+        freq_current = map_value_to_freq(current)
+        generate_sine_wave(freq_current).play()
 
         while True:
             ascending_sort = i > 0 and lst[i - 1] > current and ascending
@@ -129,10 +131,16 @@ def insertion_sort(draw_info, ascending=True):
                 break
             
             lst[i] = lst[i - 1]
+            freq_swap = map_value_to_freq(lst[i - 1])
+            generate_sine_wave(freq_swap).play()
             i = i - 1
-            lst[i] = current
-            draw_list(draw_info, {i - 1: draw_info.CURRENT_LIST_POS, i: draw_info.REPLACE_IN_LIST}, True)
+            
+            draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, i + 1: draw_info.REPLACE_IN_LIST}, True)
             yield True
+            
+        lst[i] = current
+        draw_list(draw_info, {i: draw_info.REPLACE_IN_LIST}, True)
+        yield True
     
     return lst
 
@@ -143,14 +151,21 @@ def selection_sort(draw_info, ascending=True):
     for i in range(n - 1):
         min_idx = i
         for j in range(i + 1, n):
+            freq_j = map_value_to_freq(lst[j])
+            generate_sine_wave(freq_j).play()
+
             if lst[j] < lst[min_idx] and ascending or lst[j] > lst[min_idx] and not ascending:
                 min_idx = j
+            
             draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, j: draw_info.REPLACE_IN_LIST}, True)
             yield True
                 
         lst[i], lst[min_idx] = lst[min_idx], lst[i]
+        swap_freq = map_value_to_freq(lst[i])
+        generate_sine_wave(swap_freq).play()
         
     return lst
+
 
 def counting_sort(draw_info, ascending=True):
     lst = draw_info.lst
@@ -160,10 +175,16 @@ def counting_sort(draw_info, ascending=True):
 
     for num in lst:
         count_array[num] += 1
+        freq_count = map_value_to_freq(num)
+        generate_sine_wave(freq_count).play()
+        draw_list(draw_info, {num: draw_info.CURRENT_LIST_POS}, True)
+        yield True
 
     if ascending:
         for i in range(1, M + 1):
             count_array[i] += count_array[i - 1]
+            freq_index = map_value_to_freq(i)
+            generate_sine_wave(freq_index).play()
             draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
             yield True
 
@@ -172,11 +193,15 @@ def counting_sort(draw_info, ascending=True):
             output_array[count_array[lst[i]] - 1] = lst[i]
             count_array[lst[i]] -= 1
             draw_info.lst = output_array
+            freq_output = map_value_to_freq(output_array[count_array[lst[i]]])
+            generate_sine_wave(freq_output).play()
             draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
             yield True
     else:
         for i in range(M - 1, -1, -1):
             count_array[i] += count_array[i + 1]
+            freq_index = map_value_to_freq(i)
+            generate_sine_wave(freq_index).play()
             draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
             yield True
 
@@ -185,10 +210,13 @@ def counting_sort(draw_info, ascending=True):
             output_array[count_array[lst[i]] - 1] = lst[i]
             count_array[lst[i]] -= 1
             draw_info.lst = output_array
+            freq_output = map_value_to_freq(output_array[count_array[lst[i]]])
+            generate_sine_wave(freq_output).play()
             draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
             yield True
 
     return output_array
+
 
 def merge(draw_info, left, mid, right, ascending=True):
     left_half = draw_info.lst[left:mid + 1]
@@ -198,6 +226,11 @@ def merge(draw_info, left, mid, right, ascending=True):
     sorted_index = left
 
     while left_index < len(left_half) and right_index < len(right_half):
+        freq_left = map_value_to_freq(left_half[left_index])
+        freq_right = map_value_to_freq(right_half[right_index])
+        generate_sine_wave(freq_left).play()
+        generate_sine_wave(freq_right).play()
+
         if (left_half[left_index] <= right_half[right_index] and ascending) or \
            (left_half[left_index] > right_half[right_index] and not ascending):
             draw_info.lst[sorted_index] = left_half[left_index]
@@ -234,6 +267,7 @@ def merge_sort(draw_info, left=0, right=None, ascending=True):
         yield from merge_sort(draw_info, left, mid, ascending)
         yield from merge_sort(draw_info, mid + 1, right, ascending)
         yield from merge(draw_info, left, mid, right, ascending)
+
 
 def generate_1_to_100_list():
     lst = []

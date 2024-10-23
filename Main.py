@@ -142,20 +142,83 @@ def counting_sort(draw_info, ascending=True):
     for num in lst:
         count_array[num] += 1
 
-    for i in range(1, M + 1):
-        count_array[i] += count_array[i - 1]
-        draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
-        yield True
+    if ascending:
+        for i in range(1, M + 1):
+            count_array[i] += count_array[i - 1]
+            draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
+            yield True
 
-    output_array = [0] * len(lst)
-    for i in range(len(lst) - 1, -1, -1):
-        output_array[count_array[lst[i]] - 1] = lst[i]
-        count_array[lst[i]] -= 1
-        draw_info.lst = output_array
-        draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
-        yield True
+        output_array = [0] * len(lst)
+        for i in range(len(lst) - 1, -1, -1):
+            output_array[count_array[lst[i]] - 1] = lst[i]
+            count_array[lst[i]] -= 1
+            draw_info.lst = output_array
+            draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
+            yield True
+    else:
+        for i in range(M - 1, -1, -1):
+            count_array[i] += count_array[i + 1]
+            draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
+            yield True
+
+        output_array = [0] * len(lst)
+        for i in range(len(lst)):
+            output_array[count_array[lst[i]] - 1] = lst[i]
+            count_array[lst[i]] -= 1
+            draw_info.lst = output_array
+            draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
+            yield True
 
     return output_array
+
+def merge(draw_info, left, mid, right, ascending=True):
+    left_half = draw_info.lst[left:mid + 1]
+    right_half = draw_info.lst[mid + 1:right + 1]
+
+    left_index, right_index = 0, 0
+    sorted_index = left
+
+    while left_index < len(left_half) and right_index < len(right_half):
+        if (left_half[left_index] <= right_half[right_index] and ascending) or \
+           (left_half[left_index] > right_half[right_index] and not ascending):
+            # Condition for ascending
+            # Condition for descending
+            draw_info.lst[sorted_index] = left_half[left_index]
+            left_index += 1
+        else:
+            draw_info.lst[sorted_index] = right_half[right_index]
+            right_index += 1
+        
+        draw_list(draw_info, {sorted_index: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+        sorted_index += 1
+
+    # Copy remaining elements of left_half if any
+    while left_index < len(left_half):
+        draw_info.lst[sorted_index] = left_half[left_index]
+        left_index += 1
+        sorted_index += 1
+        draw_list(draw_info, {sorted_index - 1: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+    # Copy remaining elements of right_half if any
+    while right_index < len(right_half):
+        draw_info.lst[sorted_index] = right_half[right_index]
+        right_index += 1
+        sorted_index += 1
+        draw_list(draw_info, {sorted_index - 1: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+def merge_sort(draw_info, left=0, right=None, ascending=True):
+    if right is None:
+        right = len(draw_info.lst) - 1
+
+    if left < right:
+        mid = (left + right) // 2
+        
+        yield from merge_sort(draw_info, left, mid, ascending)
+        yield from merge_sort(draw_info, mid + 1, right, ascending)
+        yield from merge(draw_info, left, mid, right, ascending)
 
 def generate_1_to_100_list():
     lst = []
@@ -186,7 +249,7 @@ def main():
 
 
     while run:
-        #clock.tick(120)
+        clock.tick(60)
 
         if sorting:
             try:
@@ -228,6 +291,9 @@ def main():
                     sorting_algorithm = counting_sort
                     sorting_algo_name = "Counting Sort"
                 elif sorting_algo_name == "Counting Sort":
+                    sorting_algorithm = merge_sort
+                    sorting_algo_name = "Merge Sort"
+                elif sorting_algo_name == "Merge Sort":
                     sorting_algorithm = bubble_sort
                     sorting_algo_name = "Bubble Sort"
 

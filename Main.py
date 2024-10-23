@@ -117,6 +117,46 @@ def insertion_sort(draw_info, ascending=True):
     
     return lst
 
+def selection_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
+    
+    for i in range(n - 1):
+        min_idx = i
+        for j in range(i + 1, n):
+            if lst[j] < lst[min_idx] and ascending or lst[j] > lst[min_idx] and not ascending:
+                min_idx = j
+            draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, j: draw_info.REPLACE_IN_LIST}, True)
+            yield True
+                
+        lst[i], lst[min_idx] = lst[min_idx], lst[i]
+        
+    return lst
+
+def counting_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    M = max(lst)
+
+    count_array = [0] * (M + 1)
+
+    for num in lst:
+        count_array[num] += 1
+
+    for i in range(1, M + 1):
+        count_array[i] += count_array[i - 1]
+        draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
+        yield True
+
+    output_array = [0] * len(lst)
+    for i in range(len(lst) - 1, -1, -1):
+        output_array[count_array[lst[i]] - 1] = lst[i]
+        count_array[lst[i]] -= 1
+        draw_info.lst = output_array
+        draw_list(draw_info, {output_array[count_array[lst[i]] - 1]: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+    return output_array
+
 def generate_1_to_100_list():
     lst = []
 
@@ -146,7 +186,7 @@ def main():
 
 
     while run:
-        clock.tick(60)
+        #clock.tick(120)
 
         if sorting:
             try:
@@ -182,8 +222,15 @@ def main():
                     sorting_algorithm = insertion_sort
                     sorting_algo_name = "Insertion Sort"
                 elif sorting_algo_name == "Insertion Sort":
+                    sorting_algorithm = selection_sort
+                    sorting_algo_name = "Selection Sort"
+                elif sorting_algo_name == "Selection Sort":
+                    sorting_algorithm = counting_sort
+                    sorting_algo_name = "Counting Sort"
+                elif sorting_algo_name == "Counting Sort":
                     sorting_algorithm = bubble_sort
                     sorting_algo_name = "Bubble Sort"
+
     
     pygame.quit()
 

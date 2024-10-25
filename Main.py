@@ -301,6 +301,125 @@ def shell_sort(draw_info, ascending=True):
         
         gap //= 2
 
+def radix_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    max_val = max(lst)
+
+    exp = 1
+    while max_val // exp > 0:
+        yield from counting_sort_radix(draw_info, exp, ascending)
+        exp *= 10
+
+def counting_sort_radix(draw_info, exp, ascending):
+    lst = draw_info.lst
+    n = len(lst)
+    output = [0] * n
+    count = [0] * 10
+    for i in range(n):
+        index = (lst[i] // exp) % 10
+        count[index] += 1
+        freq_count = map_value_to_freq(lst[i])
+        play_sound(freq_count)
+        draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS}, True)
+        yield True
+    if ascending:
+        for i in range(1, 10):
+            count[i] += count[i - 1]
+    else:
+        for i in range(8, -1, -1):
+            count[i] += count[i + 1]
+    for i in range(n - 1, -1, -1):
+        index = (lst[i] // exp) % 10
+        output[count[index] - 1] = lst[i]
+        count[index] -= 1
+
+        draw_info.lst = output
+        freq_output = map_value_to_freq(output[count[index]])
+        play_sound(freq_output)
+        draw_list(draw_info, {count[index]: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+    for i in range(n):
+        lst[i] = output[i]
+
+def comb_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
+    gap = n
+    shrink = 1.3
+    sorted = False
+
+    while not sorted:
+        gap = max(1, int(gap / shrink))
+        sorted = True
+
+        for i in range(n - gap):
+            num1 = lst[i]
+            num2 = lst[i + gap]
+
+            freq_num1 = map_value_to_freq(num1)
+            freq_num2 = map_value_to_freq(num2)
+            play_sound(freq_num1)
+            play_sound(freq_num2)
+
+            if (num1 > num2 and ascending) or (num1 < num2 and not ascending):
+                lst[i], lst[i + gap] = lst[i + gap], lst[i]
+                sorted = False
+                
+                freq_swap = map_value_to_freq(lst[i])
+                play_sound(freq_swap)
+
+                draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, i + gap: draw_info.REPLACE_IN_LIST}, True)
+                yield True
+
+        yield True
+
+    return lst
+
+def is_sorted(lst):
+    return all(lst[i] <= lst[i + 1] for i in range(len(lst) - 1))
+
+def bogo_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    while not is_sorted(lst):
+        random.shuffle(lst)
+        for index in range(len(lst)):
+            freq = map_value_to_freq(lst[index])
+            play_sound(freq)
+            draw_list(draw_info, {index: draw_info.CURRENT_LIST_POS}, True)
+    draw_info.lst = lst
+
+def quick_sort(draw_info, low, high, ascending=True):
+    if low < high:
+        pivot_index = yield from partition(draw_info, low, high, ascending)
+        yield from quick_sort(draw_info, low, pivot_index - 1, ascending)
+        yield from quick_sort(draw_info, pivot_index + 1, high, ascending)
+
+def partition(draw_info, low, high, ascending):
+    pivot = draw_info.lst[high]
+    pivot_freq = map_value_to_freq(pivot)
+    play_sound(pivot_freq)
+    i = low - 1
+
+    for j in range(low, high):
+        current_freq = map_value_to_freq(draw_info.lst[j])
+        play_sound(current_freq)
+        if (draw_info.lst[j] < pivot and ascending) or (draw_info.lst[j] > pivot and not ascending):
+            i += 1
+            draw_info.lst[i], draw_info.lst[j] = draw_info.lst[j], draw_info.lst[i]
+            swap_freq = map_value_to_freq(draw_info.lst[i])
+            play_sound(swap_freq)
+            draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, j: draw_info.REPLACE_IN_LIST}, True)
+            yield True
+
+    draw_info.lst[i + 1], draw_info.lst[high] = draw_info.lst[high], draw_info.lst[i + 1]
+    pivot_swap_freq = map_value_to_freq(draw_info.lst[i + 1])
+    play_sound(pivot_swap_freq)
+    draw_list(draw_info, {i + 1: draw_info.REPLACE_IN_LIST}, True)
+    yield True
+
+    return i + 1
+
 def generate_1_to_100_list():
     lst = []
 
@@ -355,7 +474,7 @@ def main():
                 sorting = False
             elif event.key == pygame.K_SPACE and not sorting:
                 sorting = True
-                if sorting_algorithm == merge_sort:
+                if sorting_algorithm == merge_sort or sorting_algorithm == quick_sort:
                     sorting_algorithm_generator = sorting_algorithm(draw_info, 0, len(draw_info.lst) - 1, ascending)
                 else:
                     sorting_algorithm_generator = sorting_algorithm(draw_info, ascending)
@@ -380,10 +499,20 @@ def main():
                     sorting_algorithm = shell_sort
                     sorting_algo_name = "Shell Sort"
                 elif sorting_algo_name == "Shell Sort":
+                    sorting_algorithm = comb_sort
+                    sorting_algo_name = "Comb Sort"
+                elif sorting_algo_name == "Comb Sort":
+                    sorting_algorithm = radix_sort
+                    sorting_algo_name = "Radix Sort"
+                elif sorting_algo_name == "Radix Sort":
+                    sorting_algorithm = bogo_sort
+                    sorting_algo_name = "Bogo Sort"
+                elif sorting_algo_name == "Bogo Sort":
+                    sorting_algorithm = quick_sort
+                    sorting_algo_name = "Quick Sort"
+                elif sorting_algo_name == "Quick Sort":
                     sorting_algorithm = bubble_sort
                     sorting_algo_name = "Bubble Sort"
-
-    
     pygame.quit()
 
 if __name__ == "__main__":

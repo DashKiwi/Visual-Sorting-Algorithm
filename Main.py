@@ -75,8 +75,8 @@ def draw_list(draw_info, color_positions = {}, clear_bg = False):
 
 def generate_sine_wave(freq, duration=0.1, sample_rate=44100):
     t = np.linspace(0, duration, int(sample_rate * duration), False)
-    wave = 0.5 * np.sin(2 * np.pi * freq * t)
-    wave += 0.3 * np.sin(2 * np.pi * (freq * 2) * t)
+    wave = 0.5 * np.sin(2 * np.pi * (freq + 150) * t)
+    wave += 0.3 * np.sin(2 * np.pi * (freq * 2 + 150) * t)
     decay = np.exp(-5 * t)
     wave *= decay
     wave_stereo = np.column_stack((wave, wave))
@@ -172,7 +172,6 @@ def selection_sort(draw_info, ascending=True):
         play_sound(swap_freq)
         
     return lst
-
 
 def counting_sort(draw_info, ascending=True):
     lst = draw_info.lst

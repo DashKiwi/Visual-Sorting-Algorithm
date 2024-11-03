@@ -419,6 +419,132 @@ def partition(draw_info, low, high, ascending):
 
     return i + 1
 
+def heapify(draw_info, n, i, ascending=True):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n:
+        freq_left = map_value_to_freq(draw_info.lst[left])
+        play_sound(freq_left)
+
+        if (draw_info.lst[left] > draw_info.lst[largest] and ascending) or (draw_info.lst[left] < draw_info.lst[largest] and not ascending):
+            largest = left
+
+    if right < n:
+        freq_right = map_value_to_freq(draw_info.lst[right])
+        play_sound(freq_right)
+
+        if (draw_info.lst[right] > draw_info.lst[largest] and ascending) or (draw_info.lst[right] < draw_info.lst[largest] and not ascending):
+            largest = right
+
+    if largest != i:
+        draw_info.lst[i], draw_info.lst[largest] = draw_info.lst[largest], draw_info.lst[i]
+        draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, largest: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+        yield from heapify(draw_info, n, largest, ascending)
+
+def heap_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
+
+    for i in range(n // 2 - 1, -1, -1):
+        yield from heapify(draw_info, n, i, ascending)
+
+    for i in range(n - 1, 0, -1):
+        draw_info.lst[i], draw_info.lst[0] = draw_info.lst[0], draw_info.lst[i]
+        draw_list(draw_info, {0: draw_info.CURRENT_LIST_POS, i: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+        yield from heapify(draw_info, i, 0, ascending)
+
+def cocktail_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
+    swapped = True
+    start = 0
+    end = n - 1
+
+    while swapped:
+        swapped = False
+        for i in range(start, end):
+            freq1 = map_value_to_freq(lst[i])
+            freq2 = map_value_to_freq(lst[i + 1])
+            play_sound(freq1)
+            play_sound(freq2)
+            if (lst[i] > lst[i + 1] and ascending) or (lst[i] < lst[i + 1] and not ascending):
+                lst[i], lst[i + 1] = lst[i + 1], lst[i]
+                swapped = True
+                draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, i + 1: draw_info.REPLACE_IN_LIST}, True)
+                yield True
+        if not swapped:
+            break
+
+        swapped = False
+        end -= 1
+
+        for i in range(end, start - 1, -1):
+            freq1 = map_value_to_freq(lst[i])
+            freq2 = map_value_to_freq(lst[i + 1])
+            play_sound(freq1)
+            play_sound(freq2)
+
+            if (lst[i] > lst[i + 1] and ascending) or (lst[i] < lst[i + 1] and not ascending):
+                lst[i], lst[i + 1] = lst[i + 1], lst[i]
+                swapped = True
+                draw_list(draw_info, {i: draw_info.CURRENT_LIST_POS, i + 1: draw_info.REPLACE_IN_LIST}, True)
+                yield True
+        start += 1
+
+def insertion_sort_bucket(bucket, draw_info, ascending=True):
+    for i in range(1, len(bucket)):
+        current = bucket[i]
+        j = i - 1
+        while j >= 0 and ((bucket[j] > current and ascending) or (bucket[j] < current and not ascending)):
+            bucket[j + 1] = bucket[j]
+            j -= 1
+        bucket[j + 1] = current
+
+    for value in bucket:
+        freq = map_value_to_freq(value)
+        play_sound(freq)
+        position = len(draw_info.lst) - len(bucket) + bucket.index(value)
+        draw_list(draw_info, {position: draw_info.REPLACE_IN_LIST}, True)
+        yield True
+
+    return bucket
+
+def bucket_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    max_value = max(lst)
+    bucket_count = 10
+    buckets = [[] for _ in range(bucket_count)]
+
+    for value in lst:
+        index = int(value / max_value * (bucket_count - 1))
+        buckets[index].append(value)
+
+    sorted_list = []
+
+    for bucket in buckets:
+        if bucket:
+            sorted_bucket = yield from insertion_sort_bucket(bucket, draw_info, ascending)
+            sorted_list.extend(sorted_bucket)
+
+            for value in sorted_bucket:
+                freq = map_value_to_freq(value)
+                play_sound(freq)
+
+            draw_info.lst = sorted_list
+            for j in range(len(sorted_list)):
+                draw_list(draw_info, {j: draw_info.REPLACE_IN_LIST}, True)
+                freq = map_value_to_freq(j)
+                play_sound(freq)
+                yield True
+
+    draw_info.lst = sorted_list
+
+
 def generate_1_to_100_list():
     lst = []
 
@@ -510,6 +636,15 @@ def main():
                     sorting_algorithm = quick_sort
                     sorting_algo_name = "Quick Sort"
                 elif sorting_algo_name == "Quick Sort":
+                    sorting_algorithm = heap_sort
+                    sorting_algo_name = "Heap Sort"
+                elif sorting_algo_name == "Heap Sort":
+                    sorting_algorithm = cocktail_sort
+                    sorting_algo_name = "Cocktail Sort"
+                elif sorting_algo_name == "Cocktail Sort":
+                    sorting_algorithm = bucket_sort
+                    sorting_algo_name = "Bucket Sort"
+                elif sorting_algo_name == "Bucket Sort":
                     sorting_algorithm = bubble_sort
                     sorting_algo_name = "Bubble Sort"
     pygame.quit()

@@ -252,8 +252,8 @@ def run_all_algorithms(n_runs, array_size, value_range):
 
     print("\nRunning all algorithms...")
     for name, algorithm in algorithms.items():
-        avg_time = average_sort_time(algorithm, n_runs, array_size, value_range)
-        print(f"Average time taken by {name}: {avg_time:.6f} seconds")
+        avg_time = (average_sort_time(algorithm, n_runs, array_size, value_range) * 1000)
+        print(f"Average time taken by {name}: {avg_time:.6f} milliseconds")
 
 def settings_choices():
     settings_choice = int_checker(
@@ -321,8 +321,8 @@ def main():
                 array_size = int_checker("Please enter the array size for each test: ", float('inf'))
                 value_range = int_checker("Please enter a value range for the array: ", float('inf'))
 
-            average_time = average_sort_time(algorithm, n_runs, array_size, value_range)
-            print(f"Average time taken to sort a random array with {algorithm_name}: {average_time:.6f} seconds\n"
+            average_time = (average_sort_time(algorithm, n_runs, array_size, value_range) * 1000)
+            print(f"Average time taken to sort a random array with {algorithm_name}: {average_time:.6f} milliseconds\n"
                   f"{n_runs} arrays sorted each array containing {array_size} items between 1 and {value_range}")
 
         elif algorithm_choice == 13:

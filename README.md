@@ -4,6 +4,8 @@ This python project visualizes different sorting algorithms so that they are eas
 
 ## Installation
 
+Only do the following if you want to run the python script and not running the exe by itself
+
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pygame.
 
 ```bash
@@ -11,6 +13,9 @@ pip install pygame
 ```
 or run the Setup.bat file
 ## Usage
+Run the exe file otherwise follow below
+
+Do the following if you want to run it in python rather than run the main.exe
 
 To automatically start it you can run the start.bat file which will start the program or run the code below to start it manually
 ```bash

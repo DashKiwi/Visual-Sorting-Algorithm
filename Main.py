@@ -568,8 +568,25 @@ def main():
     sorting = False
     ascending = True
 
-    sorting_algorithm = bubble_sort
-    sorting_algo_name = "Bubble Sort"
+    # Define sorting algorithms and their names
+    sorting_algorithms = [
+        (bubble_sort, "Bubble Sort"),
+        (insertion_sort, "Insertion Sort"),
+        (selection_sort, "Selection Sort"),
+        (counting_sort, "Counting Sort"),
+        (merge_sort, "Merge Sort"),
+        (shell_sort, "Shell Sort"),
+        (comb_sort, "Comb Sort"),
+        (radix_sort, "Radix Sort"),
+        (bogo_sort, "Bogo Sort"),
+        (quick_sort, "Quick Sort"),
+        (heap_sort, "Heap Sort"),
+        (cocktail_sort, "Cocktail Sort"),
+        (bucket_sort, "Bucket Sort")
+    ]
+
+    # Set initial sorting algorithm
+    sorting_algorithm, sorting_algo_name = sorting_algorithms[0]
     sorting_algorithm_generator = None
 
     while run:
@@ -593,7 +610,6 @@ def main():
                 continue
             
             if event.key == pygame.K_r:
-                #lst = generate_starting_list(n, min_val, max_val)
                 lst = generate_1_to_100_list()
                 draw_info.set_list(lst)
                 sorting = False
@@ -608,45 +624,10 @@ def main():
             elif event.key == pygame.K_d and not sorting:
                 ascending = False
             elif event.key == pygame.K_s and not sorting:
-                if sorting_algo_name == "Bubble Sort":
-                    sorting_algorithm = insertion_sort
-                    sorting_algo_name = "Insertion Sort"
-                elif sorting_algo_name == "Insertion Sort":
-                    sorting_algorithm = selection_sort
-                    sorting_algo_name = "Selection Sort"
-                elif sorting_algo_name == "Selection Sort":
-                    sorting_algorithm = counting_sort
-                    sorting_algo_name = "Counting Sort"
-                elif sorting_algo_name == "Counting Sort":
-                    sorting_algorithm = merge_sort
-                    sorting_algo_name = "Merge Sort"
-                elif sorting_algo_name == "Merge Sort":
-                    sorting_algorithm = shell_sort
-                    sorting_algo_name = "Shell Sort"
-                elif sorting_algo_name == "Shell Sort":
-                    sorting_algorithm = comb_sort
-                    sorting_algo_name = "Comb Sort"
-                elif sorting_algo_name == "Comb Sort":
-                    sorting_algorithm = radix_sort
-                    sorting_algo_name = "Radix Sort"
-                elif sorting_algo_name == "Radix Sort":
-                    sorting_algorithm = bogo_sort
-                    sorting_algo_name = "Bogo Sort"
-                elif sorting_algo_name == "Bogo Sort":
-                    sorting_algorithm = quick_sort
-                    sorting_algo_name = "Quick Sort"
-                elif sorting_algo_name == "Quick Sort":
-                    sorting_algorithm = heap_sort
-                    sorting_algo_name = "Heap Sort"
-                elif sorting_algo_name == "Heap Sort":
-                    sorting_algorithm = cocktail_sort
-                    sorting_algo_name = "Cocktail Sort"
-                elif sorting_algo_name == "Cocktail Sort":
-                    sorting_algorithm = bucket_sort
-                    sorting_algo_name = "Bucket Sort"
-                elif sorting_algo_name == "Bucket Sort":
-                    sorting_algorithm = bubble_sort
-                    sorting_algo_name = "Bubble Sort"
+                # Cycle through sorting algorithms
+                current_index = sorting_algorithms.index((sorting_algorithm, sorting_algo_name))
+                next_index = (current_index + 1) % len(sorting_algorithms)
+                sorting_algorithm, sorting_algo_name = sorting_algorithms[next_index]
     pygame.quit()
 
 if __name__ == "__main__":

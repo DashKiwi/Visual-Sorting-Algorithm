@@ -5,6 +5,7 @@ import math
 pygame.init()
 
 class DrawInfomation:
+    # Setup colors
     LIST_COLOR = [(0, 128, 0), 
                   (0, 160, 0),
                   (0, 192, 0)]
@@ -14,11 +15,13 @@ class DrawInfomation:
     MINI_TXT_COLOR = 255, 255, 255
     BACKGROUND_COLOR = 0, 0, 0
 
+    # Setup pygame fonts
     FONT = pygame.font.SysFont('comic', 30)
     LARGE_FONT = pygame.font.SysFont('comic', 40)
     TOP_PAD = 150
     SIDE_PAD = 100
 
+    # Create the window
     def __init__(self, width, height, lst):
         self.width = width
         self.height = height
@@ -27,6 +30,7 @@ class DrawInfomation:
         pygame.display.set_caption("Sorting Algorithm Visulation")
         self.set_list(lst)
     
+    # Sets the positions of the lists
     def set_list(self, lst):
         self.lst = lst
         self.max_val = max(lst)
@@ -34,46 +38,56 @@ class DrawInfomation:
 
         self.block_width = math.floor((self.width - self.SIDE_PAD) / len(lst))
         self.block_height = math.floor((self.height - self.TOP_PAD) / (self.max_val - self.min_val))
-        self.start_x = self.SIDE_PAD // 2
+        self.start_x = self.SIDE_PAD // 2 # sets the position of the individual bars x position
 
 def draw(draw_info, algo_name, ascending):
     # Create the background
     draw_info.window.fill(draw_info.BACKGROUND_COLOR)
+
+    # Render and display the algorithm name and direction (ascending or descending)
     title = draw_info.LARGE_FONT.render(f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.TITLE_TXT_COLOR)
     draw_info.window.blit(title, (draw_info.width / 2 - title.get_width() / 2, 5))
 
+    # Render and display control instructions
     controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.MINI_TXT_COLOR)
     draw_info.window.blit(controls, (draw_info.width / 2 - controls.get_width() / 2, 45))
 
+    # Render and display sorting algorithm switch instruction
     sorting = draw_info.FONT.render("S - Switch Algorithm", 1, draw_info.MINI_TXT_COLOR)
     draw_info.window.blit(sorting, (draw_info.width / 2 - sorting.get_width() / 2, 75))
 
+    # Draw the list bars
     draw_list(draw_info)
     pygame.display.update()
 
 def draw_list(draw_info, color_positions = {}, clear_bg = False):
     lst = draw_info.lst
 
+    # Clear background if specified
     if clear_bg:
         clear_rect = (draw_info.SIDE_PAD // 2, draw_info.TOP_PAD, 
                       draw_info.width - draw_info.SIDE_PAD, 
                       draw_info.height - draw_info.TOP_PAD)
         pygame.draw.rect(draw_info.window, draw_info.BACKGROUND_COLOR, clear_rect)
 
+    # Draw the list bars with appropriate colors
     for i, val in enumerate(lst):
         x = draw_info.start_x + i * draw_info.block_width
         y = draw_info.height - (val - draw_info.min_val) * draw_info.block_height
 
+        # Default color or specific color if set
         color = draw_info.LIST_COLOR[i % 3]
         if i in color_positions:
             color = color_positions[i]
         
         pygame.draw.rect(draw_info.window, color, (x, y, draw_info.block_width, draw_info.height))
 
+    # Update the display if background is cleared
     if clear_bg:
         pygame.display.update()
 
 def generate_sine_wave(freq, duration=0.1, sample_rate=44100):
+    # Generate a sine wave for the sound with frequency and decay
     t = np.linspace(0, duration, int(sample_rate * duration), False)
     wave = 0.5 * np.sin(2 * np.pi * (freq + 150) * t)
     wave += 0.3 * np.sin(2 * np.pi * (freq * 2 + 150) * t)
@@ -85,6 +99,7 @@ def generate_sine_wave(freq, duration=0.1, sample_rate=44100):
     return sound
 
 def generate_starting_list(n, min_val, max_val):
+    # Generate a random list of values with length n within the specified range
     lst = []
 
     for _ in range(n):
@@ -94,11 +109,13 @@ def generate_starting_list(n, min_val, max_val):
     return lst
 
 def map_value_to_freq(value):
+    # Map a list value to a corresponding frequency for sound
     min_freq = 400
     max_freq = 1200
     return min_freq + (max_freq - min_freq) * (value / 100)
 
 def play_sound(freq):
+    # Generate and play sound based on the frequency
     sound = generate_sine_wave(freq)
     sound.play()
 
@@ -110,6 +127,7 @@ def bubble_sort(draw_info, ascending=True):
             num2 = lst[j + 1]
 
             #freq1 = map_value_to_freq(num1)
+            # Play sound for the second number in comparison
             freq2 = map_value_to_freq(num2)
             #play_sound(freq1)
             play_sound(freq2)

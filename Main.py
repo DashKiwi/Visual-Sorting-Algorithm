@@ -4,6 +4,14 @@ import random
 import math
 pygame.init()
 
+# Frequencies for a C major scale over a few octaves
+C_MAJOR_SCALE = [
+    261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88,  # C4–B4
+    523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77,  # C5–B5
+    1046.50, 1174.66, 1318.51, 1396.91, 1567.98, 1760.00, 1975.53  # C6–B6
+]
+
+
 class DrawInfomation:
     # Setup colors
     LIST_COLOR = [(0, 128, 0), 
@@ -109,10 +117,9 @@ def generate_starting_list(n, min_val, max_val):
     return lst
 
 def map_value_to_freq(value):
-    # Map a list value to a corresponding frequency for sound
-    min_freq = 400
-    max_freq = 1200
-    return min_freq + (max_freq - min_freq) * (value / 100)
+    # Map list value (0–100) to index in scale
+    scale_index = int((value / 100) * (len(C_MAJOR_SCALE) - 1))
+    return C_MAJOR_SCALE[scale_index]
 
 def play_sound(freq):
     # Generate and play sound based on the frequency
